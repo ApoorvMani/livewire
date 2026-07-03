@@ -50,9 +50,10 @@
 
    ```caddyfile
    livewire.yourdomain.com {
-       reverse_proxy localhost:8000
        root * /opt/livewire/web/dist
        try_files {path} /index.html
+       file_server
+       reverse_proxy /api* localhost:8000
    }
    ```
 
@@ -77,7 +78,7 @@
      -d '{"username":"test","password":"password123"}'
    ```
 
-   Expected: `{"id":1,"username":"test","token":"..."}`
+   Expected: `{"id":1,"username":"test"}`
 
 ## Updating
 

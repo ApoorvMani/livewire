@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from passlib.hash import bcrypt
 from itsdangerous import URLSafeTimedSerializer
+import os
 from os import getenv
 
 from models.tables import User, Character
@@ -18,6 +19,8 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+secure = os.getenv("SESSION_SECURE", "false").lower() == "true"
 
 def make_session(user_id: int) -> str:
     secret = getenv("SECRET_KEY", "dev-secret-key")
@@ -38,7 +41,7 @@ def register(req: RegisterRequest, response: Response, db: Session = Depends(get
     db.add(char)
     db.commit()
     token = make_session(user.id)
-    response.set_cookie(key="session", value=token, httponly=True, max_age=30*86400, samesite="lax")
+    response.set_cookie(key="session", value=token, httponly=True, secure=secure, max_age=30*86400, samesite="lax")
     return {"id": user.id, "username": user.username}
 
 @router.post("/login")
@@ -47,7 +50,7 @@ def login(req: LoginRequest, response: Response, db: Session = Depends(get_db)):
     if not user or not bcrypt.verify(req.password, user.pw_hash):
         raise HTTPException(status_code=401, detail={"error": "invalid credentials", "code": "INVALID_CREDENTIALS"})
     token = make_session(user.id)
-    response.set_cookie(key="session", value=token, httponly=True, max_age=30*86400, samesite="lax")
+    response.set_cookie(key="session", value=token, httponly=True, secure=secure, max_age=30*86400, samesite="lax")
     return {"id": user.id, "username": user.username}
 
 @router.post("/logout")
