@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 const tabs = [
   { path: '/', label: 'Home', icon: '🏠' },
   { path: '/crimes', label: 'Crimes', icon: '💀' },
-  { path: '/fight', label: 'Fight', icon: '⚔️', disabled: true },
+  { path: '/fight', label: 'Fight', icon: '⚔️' },
   { path: '/market', label: 'Market', icon: '💰', disabled: true },
   { path: '/city', label: 'City', icon: '🏙️' },
 ]

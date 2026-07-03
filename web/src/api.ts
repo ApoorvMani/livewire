@@ -32,4 +32,8 @@ export const api = {
   train: (stat: string) => request(`/gym/train/${stat}`, { method: 'POST' }),
   listJail: () => request('/jail/list'),
   bust: (charId: number) => request(`/jail/${charId}/bust`, { method: 'POST' }),
+  attack: (targetName: string, choice: string) =>
+    request('/attack', { method: 'POST', body: JSON.stringify({ target_name: targetName, choice }) }),
+  deposit: (amount: number) => request('/bank/deposit', { method: 'POST', body: JSON.stringify({ amount }) }),
+  withdraw: (amount: number) => request('/bank/withdraw', { method: 'POST', body: JSON.stringify({ amount }) }),
 }

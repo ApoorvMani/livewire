@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Crimes from './pages/Crimes'
 import Gym from './pages/Gym'
 import City from './pages/City'
+import Fight from './pages/Fight'
 import BottomNav from './components/BottomNav'
 import { api } from './api'
 
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/" element={<Home user={user} />} />
           <Route path="/crimes" element={<Crimes />} />
           <Route path="/gym" element={<Gym />} />
+          <Route path="/fight" element={<Fight />} />
           <Route path="/city" element={<City />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

@@ -15,11 +15,13 @@ def create_app():
     from api.crimes import router as crimes_router
     from api.gym import router as gym_router
     from api.jail import router as jail_router
+    from api.combat import router as combat_router
 
     app.include_router(auth_router, prefix="/api")
     app.include_router(crimes_router, prefix="/api")
     app.include_router(gym_router, prefix="/api")
     app.include_router(jail_router, prefix="/api")
+    app.include_router(combat_router, prefix="/api")
     return app
 
 
