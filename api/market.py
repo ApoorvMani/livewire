@@ -1,10 +1,10 @@
-import math
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from models.tables import MarketListing, Inventory, Event, Character
+from core.market import calculate_fee
 from api.deps import get_db, get_current_character
 
 router = APIRouter(prefix="/market", tags=["market"])
@@ -17,7 +17,15 @@ def list_item(
     item_id = body.get("item_id")
     price = body.get("price")
     qty = body.get("qty", 1)
-    if not item_id or not price or qty <= 0 or price < 1 or price > 10_000_000:
+    if (
+        not item_id
+        or not price
+        or qty <= 0
+        or price < 1
+        or price > 10_000_000
+        or not isinstance(price, int)
+        or not isinstance(qty, int)
+    ):
         raise HTTPException(
             status_code=400, detail={"error": "Invalid listing", "code": "INVALID_LISTING"}
         )
@@ -26,7 +34,7 @@ def list_item(
         raise HTTPException(
             status_code=400, detail={"error": "Not enough items", "code": "NOT_ENOUGH_ITEMS"}
         )
-    fee = max(1, math.ceil(price * qty * 0.02))
+    fee = calculate_fee(price, qty)
     row = db.query(Character).filter_by(id=char.id).first()
     if row.cash < fee:
         raise HTTPException(
