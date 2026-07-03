@@ -20,6 +20,7 @@ def create_app():
     from api.market import router as market_router
     from api.jobs import router as jobs_router
     from api.heat import router as heat_router
+    from api.feed import router as feed_router
 
     app.include_router(auth_router, prefix="/api")
     app.include_router(crimes_router, prefix="/api")
@@ -30,6 +31,7 @@ def create_app():
     app.include_router(market_router, prefix="/api")
     app.include_router(jobs_router, prefix="/api")
     app.include_router(heat_router, prefix="/api")
+    app.include_router(feed_router, prefix="/api")
     return app
 
 

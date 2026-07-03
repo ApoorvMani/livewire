@@ -1,0 +1,18 @@
+EVENT_WEIGHTS = {
+    ("crime", "success"): "tier*2",
+    ("crime", "fail"): "tier",
+    ("attack", "hospitalize"): 8,
+    ("attack", "mug"): 6,
+    ("attack", "leave"): 3,
+    ("attack", "loss"): 3,
+    ("bust", "success"): 6,
+    ("bust", "fail"): 3,
+    ("trade", "buy"): 2,
+    ("levelup",): 4,
+    ("shakedown",): 9,
+    ("raid",): 9,
+    ("job_pay",): 1,
+    ("use_item",): 1,
+    ("bribe",): 2,
+    ("train",): 1,
+}

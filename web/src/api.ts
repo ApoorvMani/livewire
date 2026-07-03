@@ -55,4 +55,5 @@ export const api = {
   selectJob: (jobId: number) => request('/jobs/select', { method: 'POST', body: JSON.stringify({ job_id: jobId }) }),
   collectJob: () => request('/jobs/collect', { method: 'POST' }),
   bribe: () => request('/heat/bribe', { method: 'POST' }),
+  feed: (sinceId?: number) => request('/feed' + (sinceId ? `?since_id=${sinceId}` : '')),
 }

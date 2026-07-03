@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Bars from '../components/Bars'
 import HeatGauge from '../components/HeatGauge'
+import ActivityFeed from '../components/ActivityFeed'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
 
@@ -108,6 +109,7 @@ export default function Home({ user }: Props) {
           <div className="text-xs text-gray-400">Train your stats</div>
         </button>
       </div>
+      <ActivityFeed />
     </div>
   )
 }
