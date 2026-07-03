@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+livewire.db
+node_modules/
+dist/
