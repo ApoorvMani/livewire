@@ -65,63 +65,124 @@
 - Node.js 18+
 - npm
 
-### 1. Clone and install
+### Quick Start (Recommended)
+
+Use `run.py` to start both backend and frontend with one command:
 
 ```bash
-git clone https://github.com/your-username/livewire.git
+# 1. Clone
+git clone https://github.com/ApoorvMani/livewire.git
 cd livewire
 
-# Backend
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+# 2. Install everything
+pip install "uvicorn[standard]" fastapi sqlalchemy pydantic "passlib[bcrypt]" apscheduler httpx python-dotenv itsdangerous pytest pytest-asyncio
+cd web && npm install && cd ..
 
-# Frontend
+# 3. Set up environment
+cp .env.example .env
+# Edit .env: generate a SECRET_KEY (e.g. `python -c "import secrets; print(secrets.token_urlsafe(32))"`)
+
+# 4. Seed the database
+python -m jobs.seed
+
+# 5. Launch everything
+python run.py
+```
+
+Then open **http://localhost:5173**, register an account, and start playing.
+
+Press `Ctrl+C` to stop both services at once.
+
+### Create a Permanent Alias (Windows)
+
+```powershell
+# Add to your PowerShell profile ($PROFILE):
+function livewire {
+    cd D:\path\to\livewire
+    python run.py
+}
+```
+
+Then just type `livewire` in any terminal.
+
+### Manual Setup (Step by Step)
+
+#### 1. Clone and install
+
+```bash
+git clone https://github.com/ApoorvMani/livewire.git
+cd livewire
+```
+
+#### 2. Install backend dependencies
+
+```bash
+# Option A: Install directly (recommended on Windows)
+pip install "uvicorn[standard]" fastapi sqlalchemy pydantic "passlib[bcrypt]" apscheduler httpx python-dotenv itsdangerous pytest pytest-asyncio
+
+# Option B: Editable install (requires build tools)
+pip install -e ".[dev]"
+```
+
+#### 3. Install frontend dependencies
+
+```bash
 cd web && npm install && cd ..
 ```
 
-### 2. Set up environment
+#### 4. Set up environment
 
 ```bash
 cp .env.example .env
-# Edit .env with a random SECRET_KEY
 ```
 
-### 3. Seed the database
+Edit `.env` and replace `SECRET_KEY=change-me-to-a-long-random-string` with a real secret:
 
 ```bash
-make seed
+# Generate one:
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-This populates crimes, items, jobs, and feature flags.
+#### 5. Seed the database
 
-### 4. Start the backend
+```bash
+python -m jobs.seed
+```
+
+This populates the database with 18 crimes, 15+ items, 5 jobs, and feature flags.
+
+#### 6. Start the backend
 
 ```bash
 make dev
+# Or manually: python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-API runs at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
+API runs at `http://localhost:8000`. Interactive Swagger docs at `http://localhost:8000/docs`.
 
-### 5. Start the frontend
-
-In a separate terminal:
+#### 7. Start the frontend (separate terminal)
 
 ```bash
 make web
+# Or manually: cd web && npx vite --host
 ```
 
-Frontend runs at `http://localhost:5173` with API proxy to the backend.
+Frontend runs at `http://localhost:5173` and proxies API requests to the backend.
 
-### 6. Play
+#### 8. Play
 
-Open `http://localhost:5173`, register an account, and start your crime career.
+Open **http://localhost:5173**, register an account, and start your crime career.
 
-### Run tests
+### Run Tests
 
 ```bash
-make check        # Ruff + pytest (116 tests)
-make e2e          # Playwright smoke test (requires backend + frontend running)
+# Backend tests (116 tests)
+make check
+# Or: ruff check . && pytest -q
+
+# End-to-end Playwright smoke test (requires both services running)
+make e2e
+# Or: cd web && npx playwright test
 ```
 
 ## Game Mechanics
@@ -211,6 +272,7 @@ livewire/
 │       ├── components/# BottomNav, Bars, HeatGauge, ActivityFeed
 │       └── api.ts     # All API client methods
 ├── worker.py          # Background tick worker
+├── run.py             # Launch both backend + frontend with one command
 ├── Makefile           # dev, web, check, seed, e2e, clean
 └── pyproject.toml     # Python project config
 ```
