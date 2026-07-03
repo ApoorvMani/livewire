@@ -1,0 +1,14 @@
+[Unit]
+Description=Livewire API
+After=network.target
+
+[Service]
+Type=simple
+User=livewire
+WorkingDirectory=/opt/livewire
+ExecStart=/opt/livewire/venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8000
+EnvironmentFile=/opt/livewire/.env
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
