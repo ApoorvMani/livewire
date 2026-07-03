@@ -68,9 +68,8 @@ def bust_out(
     rng = random.Random()
     success_p = max(0.05, min(0.95, 0.30 + state.crime_skill * 0.004))
     success = rng.random() < success_p
-    row = db.query(Character).filter_by(id=char.id).first()
-    row.energy -= 10
-    row.bars_updated_at = now
+    char.energy -= 10
+    char.bars_updated_at = now
     if success:
         target.jail_until = None
         ev = Event(
@@ -82,7 +81,7 @@ def bust_out(
             weight=6,
         )
     else:
-        target.jail_until = now + timedelta(minutes=rng.randint(5, 15))
+        char.jail_until = now + timedelta(minutes=rng.randint(5, 15))
         ev = Event(
             ts=now,
             type="bust",
