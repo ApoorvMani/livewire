@@ -17,6 +17,7 @@ def create_app():
     from api.jail import router as jail_router
     from api.combat import router as combat_router
     from api.items import router as items_router
+    from api.market import router as market_router
 
     app.include_router(auth_router, prefix="/api")
     app.include_router(crimes_router, prefix="/api")
@@ -24,6 +25,7 @@ def create_app():
     app.include_router(jail_router, prefix="/api")
     app.include_router(combat_router, prefix="/api")
     app.include_router(items_router, prefix="/api")
+    app.include_router(market_router, prefix="/api")
     return app
 
 

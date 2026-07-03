@@ -43,4 +43,11 @@ export const api = {
   equip: (id: number) => request(`/inventory/${id}/equip`, { method: 'POST' }),
   unequip: (id: number) => request(`/inventory/${id}/unequip`, { method: 'POST' }),
   useItem: (id: number) => request(`/inventory/${id}/use`, { method: 'POST' }),
+  marketList: (itemId: number, price: number, qty: number) =>
+    request('/market/list', { method: 'POST', body: JSON.stringify({ item_id: itemId, price, qty }) }),
+  marketOrderBook: (itemId: number) => request(`/market/${itemId}`),
+  marketBuy: (listingId: number, qty: number) =>
+    request(`/market/buy/${listingId}`, { method: 'POST', body: JSON.stringify({ qty }) }),
+  marketCancel: (listingId: number) =>
+    request(`/market/cancel/${listingId}`, { method: 'POST' }),
 }
