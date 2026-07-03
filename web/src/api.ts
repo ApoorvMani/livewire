@@ -36,4 +36,11 @@ export const api = {
     request('/attack', { method: 'POST', body: JSON.stringify({ target_name: targetName, choice }) }),
   deposit: (amount: number) => request('/bank/deposit', { method: 'POST', body: JSON.stringify({ amount }) }),
   withdraw: (amount: number) => request('/bank/withdraw', { method: 'POST', body: JSON.stringify({ amount }) }),
+  shop: () => request('/shop'),
+  buyItem: (itemId: number, qty: number) =>
+    request('/shop/buy', { method: 'POST', body: JSON.stringify({ item_id: itemId, qty }) }),
+  inventory: () => request('/inventory'),
+  equip: (id: number) => request(`/inventory/${id}/equip`, { method: 'POST' }),
+  unequip: (id: number) => request(`/inventory/${id}/unequip`, { method: 'POST' }),
+  useItem: (id: number) => request(`/inventory/${id}/use`, { method: 'POST' }),
 }

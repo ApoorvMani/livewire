@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional, Literal
 from sqlalchemy.orm import Session
-from models.tables import Character
+from models.tables import Character, Inventory, Item, Buff as BuffTable
 from core.exceptions import DomainError
 from core.regen import apply_regen, max_bars, BarsState
 
@@ -57,6 +57,33 @@ def load_character(session: Session, char_id: int, now: datetime) -> CharacterSt
     hospital_until = row.hospital_until
     if hospital_until is not None and hospital_until.tzinfo is None:
         hospital_until = hospital_until.replace(tzinfo=timezone.utc)
+    # Load equipped item bonuses
+    weapon_bonus = 0
+    armor_bonus = 0
+    equipped_rows = (
+        session.query(Inventory, Item)
+        .join(Item, Inventory.item_id == Item.id)
+        .filter(Inventory.char_id == char_id, Inventory.equipped)
+        .all()
+    )
+    for inv, itm in equipped_rows:
+        if itm.slot == "weapon":
+            weapon_bonus += itm.bonus
+        elif itm.slot == "armor":
+            armor_bonus += itm.bonus
+    # Load active buffs
+    buff_until = None
+    active_buff = (
+        session.query(BuffTable)
+        .filter_by(char_id=char_id, kind="adrenaline")
+        .filter(BuffTable.until > now)
+        .first()
+    )
+    if active_buff:
+        b = active_buff.until
+        if b.tzinfo is None:
+            b = b.replace(tzinfo=timezone.utc)
+        buff_until = b
     return CharacterState(
         id=row.id,
         name=row.name,
@@ -80,9 +107,9 @@ def load_character(session: Session, char_id: int, now: datetime) -> CharacterSt
         jail_until=jail_until,
         job_id=row.job_id,
         faction_id=row.faction_id,
-        weapon_bonus=0,
-        armor_bonus=0,
-        buff_until=None,
+        weapon_bonus=weapon_bonus,
+        armor_bonus=armor_bonus,
+        buff_until=buff_until,
     )
 
 

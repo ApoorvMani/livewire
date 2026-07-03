@@ -4,7 +4,7 @@ const tabs = [
   { path: '/', label: 'Home', icon: '🏠' },
   { path: '/crimes', label: 'Crimes', icon: '💀' },
   { path: '/fight', label: 'Fight', icon: '⚔️' },
-  { path: '/market', label: 'Market', icon: '💰', disabled: true },
+  { path: '/market', label: 'Market', icon: '💰' },
   { path: '/city', label: 'City', icon: '🏙️' },
 ]
 

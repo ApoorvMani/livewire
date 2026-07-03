@@ -1,6 +1,16 @@
 from datetime import datetime, timezone
-from sqlalchemy import (Column, Integer, String, Float, Boolean, DateTime,
-                        ForeignKey, Text, LargeBinary, PrimaryKeyConstraint)
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Text,
+    LargeBinary,
+    PrimaryKeyConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
@@ -160,9 +170,7 @@ class LlmCache(Base):
     key_hash = Column(String(64), nullable=False)
     output = Column(Text, nullable=True)
     ts = Column(DateTime, nullable=False)
-    __table_args__ = (
-        PrimaryKeyConstraint("purpose", "key_hash"),
-    )
+    __table_args__ = (PrimaryKeyConstraint("purpose", "key_hash"),)
 
 
 class LlmLog(Base):
@@ -190,6 +198,13 @@ class MetricsEvent(Base):
     char_id = Column(Integer, nullable=True)
     name = Column(String(50), nullable=False)
     props_json = Column(Text, nullable=True)
+
+
+class Buff(Base):
+    __tablename__ = "buffs"
+    char_id = Column(Integer, ForeignKey("characters.id"), primary_key=True)
+    kind = Column(String(30), primary_key=True)
+    until = Column(DateTime, nullable=False)
 
 
 class ContentLine(Base):
