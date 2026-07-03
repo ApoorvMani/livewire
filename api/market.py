@@ -46,6 +46,16 @@ def list_item(
         db.delete(inv)
     listing = MarketListing(seller_id=char.id, item_id=item_id, price=price, qty=qty)
     db.add(listing)
+    now = datetime.now(timezone.utc)
+    db.add(
+        Event(
+            ts=now,
+            type="market_list",
+            actor_id=char.id,
+            payload_json=f'{{"item_id":{item_id},"price":{price},"qty":{qty}}}',
+            weight=1,
+        )
+    )
     db.commit()
     return {"id": listing.id, "fee": fee}
 
@@ -144,5 +154,15 @@ def cancel_listing(
         inv.qty += qty
     else:
         db.add(Inventory(char_id=char.id, item_id=item_id, qty=qty, equipped=False))
+    now = datetime.now(timezone.utc)
+    db.add(
+        Event(
+            ts=now,
+            type="market_cancel",
+            actor_id=char.id,
+            payload_json=f'{{"item_id":{item_id},"qty":{qty}}}',
+            weight=1,
+        )
+    )
     db.commit()
     return {"cancelled": True, "qty_returned": qty}

@@ -18,10 +18,14 @@ def feed(since_id: int = 0, char=Depends(get_current_character), db: Session = D
     )
     result = []
     now = datetime.now(timezone.utc)
+    if events:
+        event_ids = [e.id for e in events]
+        db.query(Event).filter(
+            Event.id.in_(event_ids),
+            Event.target_id == char.id,
+            not Event.seen_by_target,
+        ).update({"seen_by_target": True}, synchronize_session=False)
     for e in events:
-        db.query(Event).filter(Event.id == e.id, Event.target_id == char.id).update(
-            {"seen_by_target": True}
-        )
         mins_ago = int((now - e.ts).total_seconds() / 60)
         result.append(
             {

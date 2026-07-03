@@ -8,6 +8,8 @@ from models.tables import Character, Event
 from core.state import load_character, require_ok
 from core.combat import resolve_attack
 from core.exceptions import DomainError
+from core.heat import check_threshold
+from core.progression import xp_to_level
 from api.deps import get_db, get_current_character
 
 router = APIRouter(tags=["combat"])
@@ -58,6 +60,7 @@ def attack_target(
     result = resolve_attack(state, target_state, choice, rng, now)
     row = db.query(Character).filter_by(id=char.id).first()
     row.energy -= 25
+    old_heat = row.heat
     row.heat += result.heat_gain
     row.notoriety += result.notoriety_gain
     row.xp += result.xp
@@ -69,6 +72,44 @@ def attack_target(
         target_row.cash -= result.mug_amount
     if result.hospital_minutes_target > 0:
         target_row.hospital_until = now + timedelta(minutes=result.hospital_minutes_target)
+    new_level = xp_to_level(row.xp)
+    if new_level > row.level:
+        row.level = new_level
+        db.add(
+            Event(
+                ts=now,
+                type="level_up",
+                actor_id=char.id,
+                payload_json=f'{{"level":{new_level}}}',
+                weight=2,
+            )
+        )
+    for te in check_threshold(old_heat, row.heat):
+        if te["type"] == "shakedown":
+            fine = min(int(row.cash * te["fine_pct"]), te["fine_max"])
+            row.cash -= fine
+            db.add(
+                Event(
+                    ts=now,
+                    type="shakedown",
+                    actor_id=char.id,
+                    payload_json=f'{{"fine":{fine}}}',
+                    weight=te["weight"],
+                )
+            )
+        elif te["type"] == "raid":
+            loss = int(row.cash * te["cash_loss_pct"])
+            row.cash -= loss
+            row.jail_until = now + timedelta(minutes=te["jail_min"])
+            db.add(
+                Event(
+                    ts=now,
+                    type="raid",
+                    actor_id=char.id,
+                    payload_json=f'{{"cash_loss":{loss},"jail_min":{te["jail_min"]}}}',
+                    weight=te["weight"],
+                )
+            )
     ev = Event(
         ts=now,
         type="attack",
