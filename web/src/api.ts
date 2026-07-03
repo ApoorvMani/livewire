@@ -51,4 +51,8 @@ export const api = {
     request(`/market/buy/${listingId}`, { method: 'POST', body: JSON.stringify({ qty }) }),
   marketCancel: (listingId: number) =>
     request(`/market/cancel/${listingId}`, { method: 'POST' }),
+  jobs: () => request('/jobs'),
+  selectJob: (jobId: number) => request('/jobs/select', { method: 'POST', body: JSON.stringify({ job_id: jobId }) }),
+  collectJob: () => request('/jobs/collect', { method: 'POST' }),
+  bribe: () => request('/heat/bribe', { method: 'POST' }),
 }

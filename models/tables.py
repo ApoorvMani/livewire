@@ -132,6 +132,16 @@ class Nemesis(Base):
     defeats = Column(Integer, default=0)
 
 
+class Job(Base):
+    __tablename__ = "jobs"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False)
+    description = Column(String(200))
+    pay = Column(Integer, nullable=False)
+    perk_stat = Column(String(30))
+    perk_amount = Column(Float)
+
+
 class Faction(Base):
     __tablename__ = "factions"
     id = Column(Integer, primary_key=True, autoincrement=True)

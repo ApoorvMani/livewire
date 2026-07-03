@@ -11,10 +11,15 @@ from api.deps import get_db, get_current_character
 
 router = APIRouter(tags=["gym"])
 
+
 @router.post("/gym/train/{stat}")
-def train_stat(stat: str, char: Character = Depends(get_current_character), db: Session = Depends(get_db)):
+def train_stat(
+    stat: str, char: Character = Depends(get_current_character), db: Session = Depends(get_db)
+):
     if stat not in ("strength", "speed", "defense", "dexterity"):
-        raise HTTPException(status_code=400, detail={"error": "invalid stat", "code": "INVALID_STAT"})
+        raise HTTPException(
+            status_code=400, detail={"error": "invalid stat", "code": "INVALID_STAT"}
+        )
     now = datetime.now(timezone.utc)
     state = load_character(db, char.id, now)
     rng = random.Random()
@@ -26,34 +31,76 @@ def train_stat(stat: str, char: Character = Depends(get_current_character), db: 
     setattr(row, stat, getattr(row, stat) + result.stat_gain)
     row.energy -= result.energy_cost
     row.bars_updated_at = now
-    ev = Event(ts=now, type="train", actor_id=char.id,
-               payload_json=f'{{"stat":"{stat}","gain":{result.stat_gain}}}', weight=1)
+    ev = Event(
+        ts=now,
+        type="train",
+        actor_id=char.id,
+        payload_json=f'{{"stat":"{stat}","gain":{result.stat_gain}}}',
+        weight=1,
+    )
     db.add(ev)
     db.commit()
-    return {"stat": stat, "gain": result.stat_gain, "new_value": getattr(row, stat),
-            "energy_remaining": row.energy}
+    return {
+        "stat": stat,
+        "gain": result.stat_gain,
+        "new_value": getattr(row, stat),
+        "energy_remaining": row.energy,
+    }
+
 
 @router.get("/me")
 def me(char: Character = Depends(get_current_character), db: Session = Depends(get_db)):
     now = datetime.now(timezone.utc)
     state = load_character(db, char.id, now)
     from core.regen import max_bars
+
     max_e, max_n, max_h = max_bars(state.level)
     row = db.query(Character).filter_by(id=char.id).first()
     row.energy = state.energy
     row.nerve = state.nerve
     row.health = state.health
     row.bars_updated_at = state.bars_updated_at
+    from models.tables import Job, Event as EventTable
+
+    job = db.query(Job).filter_by(id=state.job_id).first() if state.job_id else None
+    last_job_event = (
+        db.query(EventTable)
+        .filter_by(actor_id=char.id, type="job_pay")
+        .order_by(EventTable.ts.desc())
+        .first()
+    )
+    can_collect = True
+    if last_job_event:
+        last_ts = last_job_event.ts
+        if last_ts.tzinfo is None:
+            last_ts = last_ts.replace(tzinfo=timezone.utc)
+        can_collect = (now - last_ts).total_seconds() >= 86400
     db.commit()
     return {
-        "id": state.id, "name": state.name, "level": state.level, "xp": state.xp,
-        "strength": state.strength, "speed": state.speed, "defense": state.defense, "dexterity": state.dexterity,
-        "energy": state.energy, "nerve": state.nerve, "health": state.health,
-        "max_energy": max_e, "max_nerve": max_n, "max_health": max_h,
+        "id": state.id,
+        "name": state.name,
+        "level": state.level,
+        "xp": state.xp,
+        "strength": state.strength,
+        "speed": state.speed,
+        "defense": state.defense,
+        "dexterity": state.dexterity,
+        "energy": state.energy,
+        "nerve": state.nerve,
+        "health": state.health,
+        "max_energy": max_e,
+        "max_nerve": max_n,
+        "max_health": max_h,
         "bars_updated_at": state.bars_updated_at.isoformat(),
-        "cash": state.cash, "bank": state.bank,
-        "heat": state.heat, "notoriety": state.notoriety,
+        "cash": state.cash,
+        "bank": state.bank,
+        "heat": state.heat,
+        "notoriety": state.notoriety,
         "crime_skill": state.crime_skill,
         "hospital_until": state.hospital_until.isoformat() if state.hospital_until else None,
         "jail_until": state.jail_until.isoformat() if state.jail_until else None,
+        "job_id": state.job_id,
+        "job_name": job.name if job else None,
+        "job_pay": job.pay if job else None,
+        "can_collect": can_collect,
     }

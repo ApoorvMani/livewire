@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from models.tables import Character, Inventory, Item, Buff as BuffTable
 from core.exceptions import DomainError
 from core.regen import apply_regen, max_bars, BarsState
+from core.heat import apply_heat_decay
 
 
 @dataclass
@@ -51,6 +52,9 @@ def load_character(session: Session, char_id: int, now: datetime) -> CharacterSt
     row.nerve = bars.nerve
     row.health = bars.health
     row.bars_updated_at = bars.updated_at
+    heat, heat_updated_at = apply_heat_decay(row.heat, row.heat_updated_at, now)
+    row.heat = heat
+    row.heat_updated_at = heat_updated_at
     jail_until = row.jail_until
     if jail_until is not None and jail_until.tzinfo is None:
         jail_until = jail_until.replace(tzinfo=timezone.utc)
@@ -99,8 +103,8 @@ def load_character(session: Session, char_id: int, now: datetime) -> CharacterSt
         bars_updated_at=bars.updated_at,
         cash=row.cash,
         bank=row.bank,
-        heat=row.heat,
-        heat_updated_at=row.heat_updated_at,
+        heat=heat,
+        heat_updated_at=heat_updated_at,
         notoriety=row.notoriety,
         crime_skill=row.crime_skill,
         hospital_until=hospital_until,
