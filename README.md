@@ -75,7 +75,7 @@ git clone https://github.com/ApoorvMani/livewire.git
 cd livewire
 
 # 2. Install everything
-pip install "uvicorn[standard]" fastapi sqlalchemy pydantic "passlib[bcrypt]" apscheduler httpx python-dotenv itsdangerous pytest pytest-asyncio
+pip install "uvicorn[standard]" fastapi sqlalchemy pydantic "passlib[bcrypt]" "bcrypt<5.0" apscheduler httpx python-dotenv itsdangerous pytest pytest-asyncio
 cd web && npm install && cd ..
 
 # 3. Set up environment
@@ -118,7 +118,7 @@ cd livewire
 
 ```bash
 # Option A: Install directly (recommended on Windows)
-pip install "uvicorn[standard]" fastapi sqlalchemy pydantic "passlib[bcrypt]" apscheduler httpx python-dotenv itsdangerous pytest pytest-asyncio
+pip install "uvicorn[standard]" fastapi sqlalchemy pydantic "passlib[bcrypt]" "bcrypt<5.0" apscheduler httpx python-dotenv itsdangerous pytest pytest-asyncio
 
 # Option B: Editable install (requires build tools)
 pip install -e ".[dev]"
