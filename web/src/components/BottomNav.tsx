@@ -5,7 +5,7 @@ const tabs = [
   { path: '/crimes', label: 'Crimes', icon: '💀' },
   { path: '/fight', label: 'Fight', icon: '⚔️', disabled: true },
   { path: '/market', label: 'Market', icon: '💰', disabled: true },
-  { path: '/city', label: 'City', icon: '🏙️', disabled: true },
+  { path: '/city', label: 'City', icon: '🏙️' },
 ]
 
 export default function BottomNav() {

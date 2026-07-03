@@ -30,4 +30,6 @@ export const api = {
   crimes: () => request('/crimes'),
   attemptCrime: (id: string) => request(`/crimes/${id}/attempt`, { method: 'POST' }),
   train: (stat: string) => request(`/gym/train/${stat}`, { method: 'POST' }),
+  listJail: () => request('/jail/list'),
+  bust: (charId: number) => request(`/jail/${charId}/bust`, { method: 'POST' }),
 }
