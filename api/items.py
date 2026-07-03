@@ -1,8 +1,10 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from models.tables import Item, Inventory, Character, Event, Buff
 from api.deps import get_db, get_current_character
+from core.items import use_consumable, ITEM_EFFECTS
+from core.state import CharacterState
 
 router = APIRouter(tags=["items"])
 
@@ -190,8 +192,14 @@ def use_item(
             status_code=400,
             detail={"error": "Not a consumable", "code": "NOT_CONSUMABLE"},
         )
-    # Check daily cap
-    if item.daily_cap:
+    effect = ITEM_EFFECTS.get(item.id)
+    if not effect:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "Unknown item", "code": "UNKNOWN_ITEM"},
+        )
+    cap = effect.get("daily_cap", 0)
+    if cap:
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         used_today = (
             db.query(Event)
@@ -203,30 +211,53 @@ def use_item(
             )
             .count()
         )
-        if used_today >= item.daily_cap:
+        if used_today >= cap:
             raise HTTPException(
                 status_code=400,
                 detail={"error": "Daily cap reached", "code": "DAILY_CAP"},
             )
     row = db.query(Character).filter_by(id=char.id).first()
-    if item.id == 11:  # Medkit
-        max_h = 100
-        row.health = min(max_h, row.health + 40)
-        row.bars_updated_at = now
-    elif item.id == 12:  # Energy Drink
-        max_e = min(150, 100 + 5 * (row.level - 1))
-        row.energy = min(max_e, row.energy + 25)
-        row.bars_updated_at = now
-    elif item.id == 13:  # Adrenaline
-        existing = db.query(Buff).filter_by(char_id=char.id, kind="adrenaline").first()
+    state = CharacterState(
+        id=row.id,
+        name=row.name,
+        level=row.level,
+        xp=row.xp,
+        strength=row.strength,
+        speed=row.speed,
+        defense=row.defense,
+        dexterity=row.dexterity,
+        energy=row.energy,
+        nerve=row.nerve,
+        health=row.health,
+        bars_updated_at=row.bars_updated_at,
+        cash=row.cash,
+        bank=row.bank,
+        heat=row.heat,
+        heat_updated_at=row.heat_updated_at,
+        notoriety=row.notoriety,
+        crime_skill=row.crime_skill,
+        hospital_until=row.hospital_until,
+        jail_until=row.jail_until,
+        job_id=row.job_id,
+        faction_id=row.faction_id,
+        weapon_bonus=0,
+        armor_bonus=0,
+        buff_until=None,
+    )
+    result = use_consumable(state, item.id, now)
+    row.health += result.health_gained
+    row.energy += result.energy_gained
+    row.bars_updated_at = now
+    if result.buff_kind:
+        existing = db.query(Buff).filter_by(char_id=char.id, kind=result.buff_kind).first()
         if existing:
-            existing.until = now + timedelta(hours=1)
+            existing.until = result.buff_until
         else:
             db.add(
                 Buff(
                     char_id=char.id,
-                    kind="adrenaline",
-                    until=now + timedelta(hours=1),
+                    kind=result.buff_kind,
+                    until=result.buff_until,
                 )
             )
     inv.qty -= 1
