@@ -1,5 +1,11 @@
 const BASE = '/api'
 
+let onUnauthorized: (() => void) | null = null
+
+export function setUnauthorizedHandler(handler: () => void) {
+  onUnauthorized = handler
+}
+
 async function request(path: string, options?: RequestInit) {
   const res = await fetch(BASE + path, {
     credentials: 'include',
@@ -7,11 +13,14 @@ async function request(path: string, options?: RequestInit) {
     ...options,
   })
   if (res.status === 401) {
-    window.location.href = '/login'
+    onUnauthorized?.()
     throw new Error('Unauthorized')
   }
   if (!res.ok) {
     const body = await res.json()
+    if (Array.isArray(body.detail)) {
+      throw new Error(body.detail.map((e: any) => e.msg).join('; '))
+    }
     throw new Error(body.detail?.error || body.error || res.statusText)
   }
   return res.json()

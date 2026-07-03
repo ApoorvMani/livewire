@@ -8,13 +8,14 @@ import City from './pages/City'
 import Fight from './pages/Fight'
 import Market from './pages/Market'
 import BottomNav from './components/BottomNav'
-import { api } from './api'
+import { api, setUnauthorizedHandler } from './api'
 
 export default function App() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    setUnauthorizedHandler(() => setUser(null))
     api.me().then(setUser).catch(() => setUser(null)).finally(() => setLoading(false))
   }, [])
 
