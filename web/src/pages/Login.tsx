@@ -29,8 +29,8 @@ export default function Login({ onLogin }: Props) {
         <button className={`px-4 py-2 ${tab === 'register' ? 'bg-blue-600' : 'bg-gray-700'}`} onClick={() => setTab('register')}>Register</button>
       </div>
       <form onSubmit={handleSubmit} className="w-full max-w-xs flex flex-col gap-3">
-        <input className="bg-gray-800 p-3 rounded" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
-        <input className="bg-gray-800 p-3 rounded" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+        <input className="bg-gray-800 p-3 rounded" name="username" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+        <input className="bg-gray-800 p-3 rounded" name="password" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
         {error && <p className="text-red-400 text-sm">{error}</p>}
         <button className="bg-blue-600 p-3 rounded font-semibold" type="submit">
           {tab === 'login' ? 'Login' : 'Register'}

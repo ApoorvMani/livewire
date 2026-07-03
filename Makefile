@@ -19,5 +19,8 @@ seed-city:
 	python -m jobs.seed
 	python -m jobs.seed
 
+e2e:
+	cd web && npx playwright test
+
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; rm -f livewire.db

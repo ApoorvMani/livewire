@@ -10,14 +10,18 @@ const stats = [
 
 export default function Gym() {
   const [message, setMessage] = useState('')
+  const [training, setTraining] = useState<string | null>(null)
 
   async function handleTrain(stat: string) {
     setMessage('')
+    setTraining(stat)
     try {
       const result = await api.train(stat)
       setMessage(`${stat} +${result.gain} (now ${result.new_value})`)
     } catch (err: any) {
       setMessage(err.message)
+    } finally {
+      setTraining(null)
     }
   }
 
@@ -32,7 +36,9 @@ export default function Gym() {
             <p className="font-semibold">{s.label}</p>
             <p className="text-xs text-gray-400">{s.desc}</p>
           </div>
-          <button className="bg-green-600 px-3 py-2 rounded text-sm" onClick={() => handleTrain(s.id)}>Train</button>
+          <button className="bg-green-600 px-3 py-2 rounded text-sm min-h-[44px]" onClick={() => handleTrain(s.id)} disabled={training !== null}>
+            {training === s.id ? '...' : 'Train'}
+          </button>
         </div>
       ))}
     </div>

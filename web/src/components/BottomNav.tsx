@@ -18,8 +18,7 @@ export default function BottomNav() {
         {tabs.map(t => (
           <button
             key={t.path}
-            disabled={t.disabled}
-            className={`flex flex-col items-center py-2 px-3 text-xs ${location.pathname === t.path ? 'text-blue-400' : 'text-gray-500'} ${t.disabled ? 'opacity-40' : ''}`}
+            className={`flex flex-col items-center py-2 px-3 text-xs ${location.pathname === t.path ? 'text-blue-400' : 'text-gray-500'}`}
             onClick={() => navigate(t.path)}
           >
             <span className="text-lg">{t.icon}</span>
